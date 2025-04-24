@@ -21,11 +21,6 @@
                 hideBelowMicSection: true
             };
 
-            // Set specific instruction if we recognize the formId
-            if (this.config.formId === "6064ab15-ab0f-4e90-83b7-777fbff338df") {
-                this.config.appInstruction = `Press the button below and tell the assistant what your issue is. Please include your <b>name, phone number, operating system and computer type (Macbook Pro, Windows Desktop etc.)</b>, and describe the issue in detail when recording.`;
-            }
-
             this.injectStyles();
 
             // Audio processing constants
@@ -50,13 +45,6 @@
             this.scriptProcessor = null;
             this.mediaRecorder = null;
             this.ws = null;
-
-            // Application instructions
-            this.appInstructions = {
-                "6064ab15-ab0f-4e90-83b7-777fbff338df": `Press the button below and tell the assistant what your issue is. Please include your <b>name, phone number, operating system and computer type (Macbook Pro, Windows Desktop etc.)</b>, and describe the issue in detail when recording.`,
-                "358b8ca5-5a94-48d1-8419-a70c59e0f960": `Press the button below and describe the vehicle service issue clearly for the assistant. Please include the <b>vehicle make, model, and year</b>, the <b>customer's reported problem</b>, your <b>initial findings</b>, the <b>repairs you recommend</b>, and your <b>name</b> as the technician before finishing the recording.`,
-                "7cf7deec-9102-4eda-abc2-e50fe4b7e548": `Press the button below and describe the home. Include your name and phone number. Include the street Address, city, state, & county. Include the age of the home and the age of the roof. Include your assessment of the Electrical and Plumbing systems of the house. Include how many levels the home has as well.`
-            };
 
             // Initialize the widget
             this.init();
