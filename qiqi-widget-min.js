@@ -365,7 +365,7 @@
                 }
             });
 
-            this.container.querySelector('#qiqiRecordButton').addEventListener('click', () => this.startMonitoring());
+//            this.container.querySelector('#qiqiRecordButton').addEventListener('click', () => this.startMonitoring());
 
             this.container.querySelector('#qiqiRoleSelect').addEventListener('change', () => this.handleRoleChange());
 
