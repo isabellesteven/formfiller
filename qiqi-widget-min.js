@@ -436,6 +436,11 @@
 
             if (this.isRecording) return;
 
+            if (!window.MediaRecorder) {
+                alert("Voice recording is not supported on your browser. Please try Safari or Chrome.");
+                return;
+            }
+
             // 🟢 Fetch microphones *only now* if not already fetched
             //const micSelect = this.container.querySelector('#qiqiMicrophoneSelect');
             //if (!micSelect.options.length) {
@@ -466,9 +471,19 @@
                 const stream = await navigator.mediaDevices.getUserMedia(constraints);
                 const isFirefox = navigator.userAgent.toLowerCase().includes("firefox");
 
-                this.audioContext = isFirefox
+                const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                try {
+                    this.audioContext = isiOS
+                        ? new AudioContext() // Avoid sampleRate param on iOS
+                        : new AudioContext({ sampleRate: 16000 });
+                } catch (err) {
+                    console.error("Failed to create AudioContext:", err);
+                    alert("Unable to access audio. Please make sure you're using a supported browser.");
+                    return;
+                }
+ /*               this.audioContext = isFirefox
                     ? new AudioContext()
-                    : new AudioContext({ sampleRate: 16000 });
+                    : new AudioContext({ sampleRate: 16000 }); */
 
                 this.source = this.audioContext.createMediaStreamSource(stream);
                 this.scriptProcessor = this.audioContext.createScriptProcessor(4096, 2, 1);
@@ -555,17 +570,28 @@
             this.mediaRecorder.onstop = async () => {
                 let audioBlob = new Blob(this.audioChunks, { type: "audio/wav" });
             
-                // Close AudioContext if active
+                // Stop mic stream
+                if (this.source && this.source.mediaStream) {
+                    const tracks = this.source.mediaStream.getTracks();
+                    tracks.forEach(track => {
+                        console.log(`Stopping track: ${track.label}, state: ${track.readyState}`);
+                        if (track.readyState === 'live') track.stop();
+                    });
+                    this.source.disconnect();
+                    this.source = null;
+                }
+            
+                // Close AudioContext
                 if (this.audioContext && this.audioContext.state !== 'closed') {
                     try {
                         await this.audioContext.close();
                     } catch (e) {
-                        console.warn("Error closing AudioContext:", e);
+                        console.warn("AudioContext close failed:", e);
                     }
                     this.audioContext = null;
                 }
             
-                // Disconnect audio nodes
+                // Disconnect and null other nodes
                 if (this.scriptProcessor) {
                     this.scriptProcessor.disconnect();
                     this.scriptProcessor = null;
@@ -574,45 +600,14 @@
                     this.analyser.disconnect();
                     this.analyser = null;
                 }
-                if (this.source) {
-                    this.source.disconnect();
-                    // Stop mic tracks to release hardware access
-                    if (this.source.mediaStream) {
-                        this.source.mediaStream.getTracks().forEach(track => {
-                            if (track.readyState === 'live') {
-                                track.stop();
-                            }
-                        });
-                    }
-                    this.source = null;
-                }
+            
+                this.mediaRecorder = null;
             
                 audioBlob = await this.processAudio(audioBlob);
                 this.uploadAudioToApiGateway(audioBlob);
             };
-/*
-            this.mediaRecorder.onstop = async () => {
-                let audioBlob = new Blob(this.audioChunks, { type: "audio/wav" });
 
-                if (this.audioContext) {
-                    this.audioContext.close();
-                    this.audioContext = null;
-                }
-                if (this.scriptProcessor) {
-                    this.scriptProcessor.disconnect();
-                }
-                if (this.mediaRecorder && this.mediaRecorder.state === "recording") {
-                    this.mediaRecorder.stop();
-                }
-                if (this.source && this.source.mediaStream) {
-                    this.source.mediaStream.getTracks().forEach(track => track.stop());
-                }
 
-                audioBlob = await this.processAudio(audioBlob);
-                this.uploadAudioToApiGateway(audioBlob);
-            };
-        }
-*/
         async getAudioProperties(audioBlob) {
             const arrayBuffer = await audioBlob.arrayBuffer();
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
