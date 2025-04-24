@@ -552,7 +552,45 @@
             this.showSpinner();
 
             this.mediaRecorder.stop();
-
+            this.mediaRecorder.onstop = async () => {
+                let audioBlob = new Blob(this.audioChunks, { type: "audio/wav" });
+            
+                // Close AudioContext if active
+                if (this.audioContext && this.audioContext.state !== 'closed') {
+                    try {
+                        await this.audioContext.close();
+                    } catch (e) {
+                        console.warn("Error closing AudioContext:", e);
+                    }
+                    this.audioContext = null;
+                }
+            
+                // Disconnect audio nodes
+                if (this.scriptProcessor) {
+                    this.scriptProcessor.disconnect();
+                    this.scriptProcessor = null;
+                }
+                if (this.analyser) {
+                    this.analyser.disconnect();
+                    this.analyser = null;
+                }
+                if (this.source) {
+                    this.source.disconnect();
+                    // Stop mic tracks to release hardware access
+                    if (this.source.mediaStream) {
+                        this.source.mediaStream.getTracks().forEach(track => {
+                            if (track.readyState === 'live') {
+                                track.stop();
+                            }
+                        });
+                    }
+                    this.source = null;
+                }
+            
+                audioBlob = await this.processAudio(audioBlob);
+                this.uploadAudioToApiGateway(audioBlob);
+            };
+/*
             this.mediaRecorder.onstop = async () => {
                 let audioBlob = new Blob(this.audioChunks, { type: "audio/wav" });
 
@@ -574,7 +612,7 @@
                 this.uploadAudioToApiGateway(audioBlob);
             };
         }
-
+*/
         async getAudioProperties(audioBlob) {
             const arrayBuffer = await audioBlob.arrayBuffer();
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
