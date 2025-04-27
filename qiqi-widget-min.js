@@ -708,6 +708,7 @@
             });
 
             try {
+                console.log('About to print URL', this.config, queryParams);
                 console.log(`${this.config.apiGatewayUploadUrl}?${queryParams.toString()}`);
                 const response = await fetch(`${this.config.apiGatewayUploadUrl}?${queryParams.toString()}`, {
                     method: "POST",
