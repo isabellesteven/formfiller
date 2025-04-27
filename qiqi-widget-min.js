@@ -184,7 +184,7 @@
                     <label for="qiqiRoleSelect">Choose Application Role:</label>
                     <select id="qiqiRoleSelect">
                         <option value="standalone">Stand Alone</option>
-                        <option value="recorder">Recorder</option>
+                        <option value="recorder">Recorder</option>file
                         <option value="receiver">Receiver</option>
                     </select>
                 </div>
@@ -708,8 +708,6 @@
             });
 
             try {
-                console.log('About to print URL', this.config, queryParams);
-                console.log(`${this.config.apiGatewayUploadUrl}?${queryParams.toString()}`);
                 const response = await fetch(`${this.config.apiGatewayUploadUrl}?${queryParams.toString()}`, {
                     method: "POST",
                     headers: {
@@ -721,6 +719,8 @@
 
                 if (response.ok) {
                     //this.notifyWebSocket(filename);
+                                    console.log('About to print URL', this.config, queryParams);
+                console.log(`${this.config.apiGatewayUploadUrl}?${queryParams.toString()}`);
                     console.log("File Uploaded!");
                 } else {
                     const errorData = await response.json();
