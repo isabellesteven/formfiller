@@ -666,6 +666,7 @@
 
         async fetchTokenForForm(formId) {
             const response = await fetch(`${this.config.tokenEndpoint}?formId=${formId}`);
+            console.log(${this.config.tokenEndpoint}?formId=${formId})
             if (!response.ok) {
                 throw new Error("Unable to fetch token");
             }
@@ -707,6 +708,7 @@
             });
 
             try {
+                console.log(${this.config.apiGatewayUploadUrl}?${queryParams.toString()});
                 const response = await fetch(`${this.config.apiGatewayUploadUrl}?${queryParams.toString()}`, {
                     method: "POST",
                     headers: {
