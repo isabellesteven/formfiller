@@ -721,7 +721,7 @@
                     //this.notifyWebSocket(filename);
                                     console.log('About to print URL', this.config, queryParams);
                 console.log(`${this.config.apiGatewayUploadUrl}?${queryParams.toString()}`);
-                    console.log("File Uploaded!");
+                    console.log("File Uploaded!**");
                 } else {
                     const errorData = await response.json();
                     console.error("Upload failed:", errorData.error || "Unknown error");
