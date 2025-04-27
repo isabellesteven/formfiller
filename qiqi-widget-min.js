@@ -768,7 +768,7 @@
 
         notifyWebSocket(filename) {
             this.container.querySelector('#qiqiStatus').innerText = "Transcribing and Analyzing...";
-
+            console.log("in notifyWebSocket");
             if (!this.websocketReady || !this.ws || this.ws.readyState !== WebSocket.OPEN) {
                 setTimeout(() => this.notifyWebSocket(filename), 500);
                 return;
